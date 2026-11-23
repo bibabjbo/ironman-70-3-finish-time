@@ -1,0 +1,11 @@
+{
+ "source_file":"ML_model.ipynb",
+ "drive_file_id":"1CPoA0-BpQmDZpUu_925XRSCJZ0R0IkDH",
+ "training":[2004,2020],"evaluation":[2021,2023],
+ "features_C0":["Gender_enc","AgeBand","Continent_enc","AthleteType_enc","EventYear"],
+ "features_C2_add":["SwimTime","BikeTime"],"target":"FinishTime (seconds)",
+ "lr":"LinearRegression()",
+ "rf":{"n_estimators":200,"max_depth":12,"min_samples_leaf":50,"n_jobs":-1,"random_state":42},
+ "preprocessing":"Original code removes relay, unknown sex and zero/missing swim, trims finish times to full-sample P1/P99 and keeps specified age groups and PRO; LabelEncoder is fit before split. See exact source in notebook.",
+ "evidence":"Preserved notebook outputs; no original C1 or CatBoost training cell."
+}
