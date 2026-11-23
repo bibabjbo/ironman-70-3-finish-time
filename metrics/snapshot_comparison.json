@@ -1,0 +1,20 @@
+{
+  "view_rows": 1153194,
+  "drive_eligible": 1152658,
+  "view_eligible": 1152658,
+  "drive_only": 0,
+  "view_only": 0,
+  "different_values": {
+    "raceid": 0,
+    "gender": 0,
+    "agegroup": 0,
+    "ageband": 0,
+    "athletetype": 0,
+    "countryiso": 0,
+    "eventyear": 0,
+    "eventlocation": 0,
+    "swimtime": 0,
+    "biketime": 0,
+    "finishtime": 0
+  }
+}
