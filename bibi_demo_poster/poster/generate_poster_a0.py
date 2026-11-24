@@ -486,7 +486,7 @@ def build_a0_poster() -> Path:
     pdf_path = POSTER_DIR / "IRONMAN_70_3_Finish_Time_Poster_A0.pdf"
     c = canvas.Canvas(str(pdf_path), pagesize=(W_PT, H_PT))
     c.setTitle("IRONMAN 70.3 Finish Time Prediction Across Race Checkpoints — A0 Research Poster")
-    c.setAuthor("Group 6 — Department of Artificial Intelligence, FPT University Da Nang")
+    c.setAuthor("Department of Artificial Intelligence, FPT University Da Nang")
     c.setSubject("Prospective Multi-Checkpoint Triathlon Finish Time Forecasting (C0, C1, C2)")
 
     # 1. Warm Cream Background (#FFFDF5) & Outer Frame
@@ -525,7 +525,7 @@ def build_a0_poster() -> Path:
     c.drawString(
         header_x + 18,
         header_y + header_h - strip_h + 14,
-        "FPT UNIVERSITY DA NANG · DEPARTMENT OF ARTIFICIAL INTELLIGENCE · RESEARCH-BASED LEARNING (GROUP 6)",
+        "FPT UNIVERSITY DA NANG · DEPARTMENT OF ARTIFICIAL INTELLIGENCE · RESEARCH-BASED LEARNING",
     )
 
     # Right pill in top strip
@@ -557,7 +557,7 @@ def build_a0_poster() -> Path:
     c.drawString(
         header_x + 20,
         header_y + header_h - 164,
-        "Authors: Group 6 Research Team (Class AI21A02 · Database Systems & Predictive Modeling Track — Khue, Bibi, Hoi & Team Members)",
+        "Authors: Khue, Bibi, Hoi & Research Team Members (Class AI21A02 · Database Systems & Predictive Modeling Track)",
     )
     c.setFont("Helvetica", 13.5)
     c.drawString(

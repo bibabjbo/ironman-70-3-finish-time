@@ -66,7 +66,7 @@ def render_header_banner(active_mode: str, active_split: str, active_cp: str) ->
                     {logo_svg}
                 </div>
                 <div>
-                    <span class="nb-badge nb-badge-black">PHÂN TÍCH THỂ THAO IRONMAN 70.3 · NHÓM 6</span>
+                    <span class="nb-badge nb-badge-black">PHÂN TÍCH THỂ THAO IRONMAN 70.3</span>
                     <span class="nb-badge nb-badge-c2">● CHẾ ĐỘ NGOẠI TUYẾN 100% (CHỈ ĐỌC)</span>
                 </div>
             </div>
