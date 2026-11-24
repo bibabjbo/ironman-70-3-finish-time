@@ -155,6 +155,50 @@ ACTIVE_EVENT_LOCATIONS: List[str] = [
 ]
 
 
+# Exact split border ranges (in seconds) extracted directly from the 6 saved CatBoost .cbm models
+MODEL_SPLIT_BORDER_BOUNDS: Dict[Tuple[str, str], Dict[str, Tuple[float, float]]] = {
+    ("I", "C1"): {"swimtime": (1497.5, 4235.5)},
+    ("I", "C2"): {"swimtime": (1582.5, 4235.5), "biketime": (8271.5, 15430.5)},
+    ("II", "C1"): {"swimtime": (1582.5, 4172.5)},
+    ("II", "C2"): {"swimtime": (1525.5, 4172.5), "biketime": (8096.5, 15427.5)},
+}
+
+
+def check_split_border_saturation(
+    split: str,
+    checkpoint: str,
+    feature_name: str,
+    value_seconds: Optional[float],
+) -> Optional[Dict[str, Any]]:
+    """
+    Check if an input split time (swimtime or biketime) falls outside the quantized
+    decision-tree split borders of the active CatBoost model ({split}_{checkpoint}.cbm).
+    Returns None if inside the active split-border range, or a dict describing the
+    boundary saturation when below min_border or above max_border.
+    """
+    if value_seconds is None or not np.isfinite(value_seconds) or value_seconds <= 0:
+        return None
+    bounds = MODEL_SPLIT_BORDER_BOUNDS.get((split, checkpoint), {}).get(feature_name)
+    if bounds is None:
+        return None
+    min_b, max_b = bounds
+    if value_seconds < min_b:
+        return {
+            "direction": "below_min",
+            "min_border": min_b,
+            "max_border": max_b,
+            "value_seconds": float(value_seconds),
+        }
+    if value_seconds > max_b:
+        return {
+            "direction": "above_max",
+            "min_border": min_b,
+            "max_border": max_b,
+            "value_seconds": float(value_seconds),
+        }
+    return None
+
+
 def format_seconds_hms(seconds: Optional[float], signed: bool = False) -> str:
     """
     Format a duration in seconds as HH:MM:SS.

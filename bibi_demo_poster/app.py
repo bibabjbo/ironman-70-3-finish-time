@@ -39,6 +39,7 @@ from inference import (
     ACTIVE_COUNTRIES,
     ACTIVE_EVENT_LOCATIONS,
     IronmanInferenceEngine,
+    check_split_border_saturation,
     format_seconds_hms,
     hms_to_seconds,
     validate_athlete_inputs,
@@ -371,6 +372,26 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 f"Thời gian bơi đã nhập (`swimtime`): **{format_seconds_hms(swim_seconds_val)}** = **`{swim_seconds_val:,.0f}` giây** "
                 f"({swim_seconds_val/60:,.2f} phút)"
             )
+            swim_sat = check_split_border_saturation(
+                current_split, current_cp, "swimtime", swim_seconds_val
+            )
+            if swim_sat is not None and 600 <= swim_seconds_val <= 10800:
+                min_s, max_s = swim_sat["min_border"], swim_sat["max_border"]
+                bound_desc = (
+                    f"vượt ngưỡng chia tối đa (<code>{max_s:,.1f} giây</code> / <code>{format_seconds_hms(max_s)}</code>)"
+                    if swim_sat["direction"] == "above_max"
+                    else f"nhỏ hơn ngưỡng chia tối thiểu (<code>{min_s:,.1f} giây</code> / <code>{format_seconds_hms(min_s)}</code>)"
+                )
+                render_html(
+                    f"""
+                    <div class="nb-saturation-note">
+                        <b>⚠ CHÚ THÍCH KỸ THUẬT (BÃO HÒA NGƯỠNG CHIA MÔ HÌNH):</b> Giá trị <code>swimtime = {swim_seconds_val:,.0f} giây</code>
+                        hợp lệ để chạy mô phỏng nhưng {bound_desc} của cây quyết định
+                        <code>{current_split}_{current_cp}.cbm</code> (phạm vi ngưỡng chia: <code>{min_s:,.1f}–{max_s:,.1f} giây</code>).
+                        Do đó <code>CatBoost_ref</code> giữ nguyên giá trị dự đoán tại nút lá biên (không phải lỗi giới hạn thời gian thi đấu).
+                    </div>
+                    """
+                )
 
         if current_cp == "C2":
             render_html(
@@ -398,6 +419,26 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 f"Thời gian đạp xe đã nhập (`biketime`): **{format_seconds_hms(bike_seconds_val)}** = **`{bike_seconds_val:,.0f}` giây** "
                 f"({bike_seconds_val/60:,.2f} phút)"
             )
+            bike_sat = check_split_border_saturation(
+                current_split, current_cp, "biketime", bike_seconds_val
+            )
+            if bike_sat is not None and 2400 <= bike_seconds_val <= 25200:
+                min_b, max_b = bike_sat["min_border"], bike_sat["max_border"]
+                bound_desc_b = (
+                    f"vượt ngưỡng chia tối đa (<code>{max_b:,.1f} giây</code> / <code>{format_seconds_hms(max_b)}</code>)"
+                    if bike_sat["direction"] == "above_max"
+                    else f"nhỏ hơn ngưỡng chia tối thiểu (<code>{min_b:,.1f} giây</code> / <code>{format_seconds_hms(min_b)}</code>)"
+                )
+                render_html(
+                    f"""
+                    <div class="nb-saturation-note">
+                        <b>⚠ CHÚ THÍCH KỸ THUẬT (BÃO HÒA NGƯỠNG CHIA MÔ HÌNH):</b> Giá trị <code>biketime = {bike_seconds_val:,.0f} giây</code>
+                        hợp lệ để chạy mô phỏng nhưng {bound_desc_b} của cây quyết định
+                        <code>{current_split}_{current_cp}.cbm</code> (phạm vi ngưỡng chia: <code>{min_b:,.1f}–{max_b:,.1f} giây</code>).
+                        Do đó <code>CatBoost_ref</code> giữ nguyên giá trị dự đoán tại nút lá biên (không phải lỗi giới hạn thời gian thi đấu).
+                    </div>
+                    """
+                )
 
         # Quick Advance Checkpoint Button
         if current_cp == "C0":

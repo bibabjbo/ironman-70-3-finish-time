@@ -131,6 +131,21 @@ footer {visibility: hidden;}
 .nb-badge-accent { background-color: var(--accent-coral); color: #000000; }
 .nb-badge-black { background-color: #000000; color: #FFFDF5; box-shadow: 3px 3px 0px #FFD23F; }
 
+/* Compact Technical Note Box for Tree Split-Border Saturation */
+.nb-saturation-note {
+    background-color: var(--c0-yellow);
+    border: 2px solid #000000;
+    box-shadow: 3px 3px 0px #000000;
+    border-radius: 0px !important;
+    padding: 0.45rem 0.7rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.55rem;
+    font-family: var(--font-mono) !important;
+    font-size: 0.76rem;
+    line-height: 1.38;
+    color: #000000;
+}
+
 /* Header Banner */
 .nb-header-box {
     background-color: #FFFFFF;

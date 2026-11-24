@@ -180,7 +180,7 @@ def render_hero_prediction_card(
         </div>
         <div class="nb-pred-time">{format_seconds_hms(cb_sec)}</div>
         <div style="margin-bottom: 0.85rem;">
-            <span class="nb-pred-seconds">GIÁ TRỊ CHÍNH XÁC: {cb_sec:,.2f} GIÂY ({cb_sec/60:,.2f} PHÚT)</span>
+            <span class="nb-pred-seconds">GIÁ TRỊ DỰ ĐOÁN: {cb_sec:,.2f} GIÂY ({cb_sec/60:,.2f} PHÚT)</span>
         </div>
         <div>{deltas_html}</div>
     </div>
