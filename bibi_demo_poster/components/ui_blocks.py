@@ -281,7 +281,7 @@ def make_live_comparison_figure(
     Create a clean Neubrutalist Matplotlib horizontal bar chart comparing live predictions
     (B0, B1/B2, CatBoost_ref) across available checkpoints (Vietnamese labels).
     """
-    plt.rcParams["font.sans-serif"] = ["Segoe UI", "Arial", "DejaVu Sans"]
+    plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Segoe UI", "Arial"]
     fig, ax = plt.subplots(figsize=(8.2, 3.8), dpi=140)
     fig.patch.set_facecolor(PALETTE["white"])
     ax.set_facecolor(PALETTE["cream"])
@@ -383,7 +383,7 @@ def make_replay_chart(
     """
     Create a Neubrutalist comparison chart for Real Test Replay (metrics/example.csv) in Vietnamese.
     """
-    plt.rcParams["font.sans-serif"] = ["Segoe UI", "Arial", "DejaVu Sans"]
+    plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Segoe UI", "Arial"]
     fig, ax = plt.subplots(figsize=(8.4, 4.0), dpi=140)
     fig.patch.set_facecolor(PALETTE["white"])
     ax.set_facecolor(PALETTE["cream"])
@@ -485,7 +485,7 @@ def make_global_mae_chart(all_models_df: pd.DataFrame, split: str) -> plt.Figure
     """
     Plot official MAE (minutes) across C0, C1, C2 from metrics/all_models.csv (Vietnamese labels).
     """
-    plt.rcParams["font.sans-serif"] = ["Segoe UI", "Arial", "DejaVu Sans"]
+    plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Segoe UI", "Arial"]
     fig, ax = plt.subplots(figsize=(8.4, 3.8), dpi=140)
     fig.patch.set_facecolor(PALETTE["white"])
     ax.set_facecolor(PALETTE["cream"])
