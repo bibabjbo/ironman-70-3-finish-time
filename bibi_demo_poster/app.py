@@ -53,6 +53,36 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+# Force module cache invalidation across code updates on Streamlit Cloud
+import importlib
+import styles.neubrutalism as _nb_styles_mod
+import components.ui_blocks as _nb_ui_mod
+import inference.engine as _nb_eng_mod
+
+importlib.reload(_nb_styles_mod)
+importlib.reload(_nb_eng_mod)
+importlib.reload(_nb_ui_mod)
+
+from components.ui_blocks import (
+    make_global_mae_chart,
+    make_live_comparison_figure,
+    make_replay_chart,
+    render_checkpoint_stepper,
+    render_header_banner,
+    render_hero_prediction_card,
+    render_race_progress_card,
+)
+from inference.engine import (
+    ACTIVE_COUNTRIES,
+    ACTIVE_EVENT_LOCATIONS,
+    IronmanInferenceEngine,
+    check_split_border_saturation,
+    format_seconds_hms,
+    hms_to_seconds,
+    validate_athlete_inputs,
+)
+from styles.neubrutalism import NEUBRUTAL_CSS
+
 # Apply Neubrutalist Editorial CSS
 st.markdown(NEUBRUTAL_CSS, unsafe_allow_html=True)
 
