@@ -19,7 +19,7 @@ Hard Shadows:
 
 NEUBRUTAL_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&family=Space+Grotesk:wght@600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400..800;1,400..800&family=Space+Grotesk:wght@600;700&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
     --bg-cream: #FFFDF5;
@@ -30,9 +30,9 @@ NEUBRUTAL_CSS = """
     --c2-mint: #88D498;
     --accent-coral: #FF6B6B;
     --surface-white: #FFFFFF;
-    --font-heading: 'Space Grotesk', 'Segoe UI', 'Arial Black', sans-serif;
-    --font-body: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-mono: 'Space Mono', 'Consolas', 'Courier New', monospace;
+    --font-heading: 'Be Vietnam Pro', 'Space Grotesk', 'Segoe UI', 'Arial', sans-serif;
+    --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'Space Mono', 'Be Vietnam Pro', 'Consolas', 'Courier New', monospace;
 }
 
 /* Global App Background & Typography */
@@ -136,17 +136,52 @@ footer {visibility: hidden;}
     background-color: #FFFFFF;
     border: 3px solid #000000;
     box-shadow: 7px 7px 0px #000000;
-    padding: 1.5rem 2rem;
+    padding: 1.4rem 1.8rem;
     margin-bottom: 1.5rem;
+}
+
+.nb-header-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 3px solid #000000;
+    padding-bottom: 0.9rem;
+    margin-bottom: 0.9rem;
+}
+
+.nb-logo-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+}
+
+.nb-official-logo-box {
+    background-color: #FFFDF5;
+    border: 2px solid #000000;
+    box-shadow: 3px 3px 0px #000000;
+    padding: 0.45rem 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nb-official-logo-box svg,
+.nb-official-logo-box img {
+    height: 36px;
+    width: auto;
+    display: block;
 }
 
 .nb-title-main {
     font-family: var(--font-heading) !important;
-    font-size: 2.35rem;
+    font-size: 2.15rem;
     font-weight: 800;
-    line-height: 1.08;
+    line-height: 1.15;
     text-transform: uppercase;
-    margin: 0.35rem 0 0.5rem 0;
+    margin: 0.25rem 0 0.5rem 0;
     color: #000000;
 }
 

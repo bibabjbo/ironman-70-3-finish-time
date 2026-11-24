@@ -1,14 +1,14 @@
 """
-IRONMAN 70.3 Finish Time Prediction — Offline Exhibition Demo Application.
+IRONMAN 70.3 Finish Time Prediction — Ứng dụng Mô phỏng Ngoại tuyến (Giao diện Tiếng Việt).
 
-Design System: NEUBRUTALISM + SPORTS ANALYTICS EDITORIAL
-Architecture: 100% Local Offline Execution (Read-Only Access to Repository Assets)
+Hệ thống thiết kế: NEUBRUTALISM + SPORTS ANALYTICS EDITORIAL
+Kiến trúc: Chạy ngoại tuyến 100% (Truy cập chỉ đọc vào dữ liệu và mô hình gốc của dự án)
 
-Modes:
-1. Demo Mode A — Live Simulation (C0 -> C1 -> C2 progressive race inference)
-2. Demo Mode B — Real Test Replay (10 saved test examples from metrics/example.csv)
+Hai chế độ hoạt động:
+1. Chế độ A — Mô phỏng trực tiếp (C0 -> C1 -> C2 theo tiến trình cuộc đua)
+2. Chế độ B — Xem lại dữ liệu kiểm thử (10 vận động viên kiểm thử thực tế từ metrics/example.csv)
 
-Launch command:
+Lệnh khởi chạy:
     streamlit run bibi_demo_poster/app.py
 """
 
@@ -46,7 +46,7 @@ from inference import (
 from styles import NEUBRUTAL_CSS
 
 st.set_page_config(
-    page_title="IRONMAN 70.3 · Finish Time Prediction Demo",
+    page_title="IRONMAN 70.3 · Dự đoán thời gian về đích",
     page_icon="⏱️",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -137,7 +137,7 @@ active_cp_for_header = (
     else st.session_state["replay_cp"]
 )
 
-# 1–3. Header, Branding, Title, Explanation, and Offline Mode Indicator
+# 1–3. Header, Official IRONMAN Logo, Title, Explanation, and Offline Mode Indicator
 render_header_banner(
     active_mode=st.session_state["demo_mode"],
     active_split=st.session_state["eval_split"],
@@ -145,13 +145,13 @@ render_header_banner(
 )
 
 # 4. Top Navigation Bar: Mode Switcher + Evaluation Cohort Selector + Reset Demo
-nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1.3, 1.3, 1.7, 0.8])
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([1.3, 1.35, 1.65, 0.85])
 
 with nav_col1:
     mode_a_label = (
-        "● MODE A: LIVE SIMULATION"
+        "● CHẾ ĐỘ A: MÔ PHỎNG TRỰC TIẾP"
         if st.session_state["demo_mode"] == "LIVE_SIMULATION"
-        else "○ MODE A: LIVE SIMULATION"
+        else "○ CHẾ ĐỘ A: MÔ PHỎNG TRỰC TIẾP"
     )
     if st.button(mode_a_label, key="btn_mode_a", use_container_width=True):
         st.session_state["demo_mode"] = "LIVE_SIMULATION"
@@ -159,9 +159,9 @@ with nav_col1:
 
 with nav_col2:
     mode_b_label = (
-        "● MODE B: REAL TEST REPLAY (10)"
+        "● CHẾ ĐỘ B: XEM LẠI DỮ LIỆU KIỂM THỬ"
         if st.session_state["demo_mode"] == "REAL_TEST_REPLAY"
-        else "○ MODE B: REAL TEST REPLAY (10)"
+        else "○ CHẾ ĐỘ B: XEM LẠI DỮ LIỆU KIỂM THỬ"
     )
     if st.button(mode_b_label, key="btn_mode_b", use_container_width=True):
         st.session_state["demo_mode"] = "REAL_TEST_REPLAY"
@@ -169,16 +169,16 @@ with nav_col2:
 
 with nav_col3:
     split_options = {
-        "II": "EVAL II · Fit 2004–18 / Test 2021–23 (II_*.cbm)",
-        "I": "EVAL I · Fit 2004–16 / Test 2019–20 (I_*.cbm)",
+        "II": "Evaluation II · Huấn luyện 2004–18 / Kiểm thử 2021–23 (II_*.cbm)",
+        "I": "Evaluation I · Huấn luyện 2004–16 / Kiểm thử 2019–20 (I_*.cbm)",
     }
     selected_split = st.selectbox(
-        "EVALUATION COHORT & SAVED MODEL GROUP",
+        "NHÓM ĐÁNH GIÁ & MÔ HÌNH ĐÃ LƯU",
         options=["II", "I"],
         index=0 if st.session_state["eval_split"] == "II" else 1,
         format_func=lambda s: split_options[s],
         disabled=(st.session_state["demo_mode"] == "REAL_TEST_REPLAY"),
-        help="Selects which temporal evaluation split's CatBoost models (I_C*.cbm or II_C*.cbm) and baseline tables are used. Real Test Replay uses Evaluation II as stored in metrics/example.csv.",
+        help="Chọn giai đoạn đánh giá theo thời gian để nạp đúng mô hình CatBoost (I_C*.cbm hoặc II_C*.cbm) và bảng Baseline. Chế độ Xem lại dữ liệu kiểm thử sử dụng Evaluation II theo đúng dữ liệu trong metrics/example.csv.",
     )
     if (
         st.session_state["demo_mode"] == "LIVE_SIMULATION"
@@ -190,13 +190,13 @@ with nav_col3:
 
 with nav_col4:
     st.markdown("<div style='height: 1.68rem;'></div>", unsafe_allow_html=True)
-    if st.button("↺ RESET DEMO", key="btn_reset_demo", type="primary", use_container_width=True):
+    if st.button("↺ ĐẶT LẠI MÔ PHỎNG", key="btn_reset_demo", type="primary", use_container_width=True):
         reset_demo_state()
         st.rerun()
 
 
 # =============================================================================
-# MODE A: LIVE SIMULATION (C0 -> C1 -> C2)
+# CHẾ ĐỘ A: MÔ PHỎNG TRỰC TIẾP (C0 -> C1 -> C2)
 # =============================================================================
 if st.session_state["demo_mode"] == "LIVE_SIMULATION":
     current_cp = st.session_state["live_cp"]
@@ -207,17 +207,17 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
 
     cp_btn1, cp_btn2, cp_btn3 = st.columns(3)
     with cp_btn1:
-        b_c0 = "● SELECT C0 — BEFORE RACE" if current_cp == "C0" else "SELECT C0 — BEFORE RACE"
+        b_c0 = "● CHỌN C0 — TRƯỚC CUỘC ĐUA" if current_cp == "C0" else "CHỌN C0 — TRƯỚC CUỘC ĐUA"
         if st.button(b_c0, key="btn_live_c0", use_container_width=True):
             st.session_state["live_cp"] = "C0"
             st.rerun()
     with cp_btn2:
-        b_c1 = "● SELECT C1 — AFTER SWIM" if current_cp == "C1" else "SELECT C1 — AFTER SWIM"
+        b_c1 = "● CHỌN C1 — SAU CHẶNG BƠI" if current_cp == "C1" else "CHỌN C1 — SAU CHẶNG BƠI"
         if st.button(b_c1, key="btn_live_c1", use_container_width=True):
             st.session_state["live_cp"] = "C1"
             st.rerun()
     with cp_btn3:
-        b_c2 = "● SELECT C2 — AFTER BIKE" if current_cp == "C2" else "SELECT C2 — AFTER BIKE"
+        b_c2 = "● CHỌN C2 — SAU CHẶNG ĐẠP XE" if current_cp == "C2" else "CHỌN C2 — SAU CHẶNG ĐẠP XE"
         if st.button(b_c2, key="btn_live_c2", use_container_width=True):
             st.session_state["live_cp"] = "C2"
             st.rerun()
@@ -230,12 +230,12 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             f"""
             <div class="nb-card">
                 <div class="nb-section-header">
-                    <span>ATHLETE & RACE INPUTS ({current_cp})</span>
-                    <span class="nb-badge nb-badge-{current_cp.lower()}">MODEL: {current_split}_{current_cp}.cbm</span>
+                    <span>THÔNG TIN VẬN ĐỘNG VIÊN & ĐẦU VÀO ({current_cp})</span>
+                    <span class="nb-badge nb-badge-{current_cp.lower()}">MÔ HÌNH: {current_split}_{current_cp}.cbm</span>
                 </div>
                 <p style="font-size: 0.88rem; margin-bottom: 0.5rem;">
-                    Only features genuinely required by <code>models/{current_split}_{current_cp}.cbm</code> are active below.
-                    Actual FinishTime is never requested or used as an input.
+                    Chỉ các đặc trưng thực sự được mô hình <code>models/{current_split}_{current_cp}.cbm</code> yêu cầu tại mốc <b>{current_cp}</b> mới được mở bên dưới.
+                    Thời gian về đích thực tế không bao giờ được yêu cầu hoặc dùng làm đầu vào.
                 </p>
             </div>
             """
@@ -244,7 +244,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
         # Quick Athlete Presets for Exhibition Visitors
         pr_c1, pr_c2, pr_c3 = st.columns(3)
         with pr_c1:
-            if st.button("P1: F 35-39 US", key="pre_1", use_container_width=True):
+            if st.button("MẪU 1: F 35-39 US", key="pre_1", use_container_width=True):
                 st.session_state["gender"] = "F"
                 st.session_state["agegroup"] = "35-39"
                 st.session_state["countryiso"] = "US"
@@ -254,7 +254,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 st.session_state["bike_h"], st.session_state["bike_m"], st.session_state["bike_s"] = 2, 42, 0
                 st.rerun()
         with pr_c2:
-            if st.button("P2: M 30-34 VN", key="pre_2", use_container_width=True):
+            if st.button("MẪU 2: M 30-34 VN", key="pre_2", use_container_width=True):
                 st.session_state["gender"] = "M"
                 st.session_state["agegroup"] = "30-34"
                 st.session_state["countryiso"] = "VN"
@@ -264,7 +264,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 st.session_state["bike_h"], st.session_state["bike_m"], st.session_state["bike_s"] = 2, 28, 0
                 st.rerun()
         with pr_c3:
-            if st.button("P3: M 50-54 AT", key="pre_3", use_container_width=True):
+            if st.button("MẪU 3: M 50-54 AT", key="pre_3", use_container_width=True):
                 st.session_state["gender"] = "M"
                 st.session_state["agegroup"] = "50-54"
                 st.session_state["countryiso"] = "AT"
@@ -278,10 +278,10 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
         in_c1, in_c2 = st.columns(2)
         with in_c1:
             gender_val = st.selectbox(
-                "1. GENDER (gender)",
+                "1. GIỚI TÍNH (gender)",
                 options=["F", "M"],
                 index=0 if st.session_state["gender"] == "F" else 1,
-                format_func=lambda g: "F — Female (Age-Group)" if g == "F" else "M — Male (Age-Group)",
+                format_func=lambda g: "F — Nữ (Age-Group)" if g == "F" else "M — Nam (Age-Group)",
             )
             st.session_state["gender"] = gender_val
 
@@ -289,7 +289,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             ag_list = engine.agegroups
             ag_idx = ag_list.index(st.session_state["agegroup"]) if st.session_state["agegroup"] in ag_list else 3
             agegroup_val = st.selectbox(
-                "2. AGE GROUP → AGEBAND (ageband)",
+                "2. NHÓM TUỔI → CẬN DƯỚI (ageband)",
                 options=ag_list,
                 index=ag_idx,
                 format_func=lambda ag: f"{ag} (ageband = {ag.split('-')[0]})",
@@ -300,29 +300,30 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
         country_labels = {c[0]: c[1] for c in ACTIVE_COUNTRIES}
         c_idx = country_codes.index(st.session_state["countryiso"]) if st.session_state["countryiso"] in country_codes else 0
         country_val = st.selectbox(
-            "3. ATHLETE COUNTRY ISO2 (countryiso)",
+            "3. MÃ QUỐC GIA VẬN ĐỘNG VIÊN (countryiso)",
             options=country_codes,
             index=c_idx,
             format_func=lambda code: country_labels.get(code, code),
         )
         st.session_state["countryiso"] = country_val
 
-        loc_options = ACTIVE_EVENT_LOCATIONS + ["[Custom / Other Event Location...]"]
+        custom_loc_option = "[Tùy chỉnh / Nhập địa điểm giải đấu khác...]"
+        loc_options = ACTIVE_EVENT_LOCATIONS + [custom_loc_option]
         loc_idx = (
             loc_options.index(st.session_state["eventlocation"])
             if st.session_state["eventlocation"] in loc_options
             else 0
         )
         selected_loc = st.selectbox(
-            "4. EVENT LOCATION (eventlocation)",
+            "4. ĐỊA ĐIỂM GIẢI ĐẤU (eventlocation)",
             options=loc_options,
             index=loc_idx,
         )
-        if selected_loc == "[Custom / Other Event Location...]":
+        if selected_loc == custom_loc_option:
             custom_loc = st.text_input(
-                "ENTER CUSTOM EVENT LOCATION (Whitespace trimmed; empty → __MISSING__)",
+                "NHẬP TÊN ĐỊA ĐIỂM GIẢI ĐẤU (Tự động cắt khoảng trắng; để trống → __MISSING__)",
                 value=st.session_state["custom_location"],
-                placeholder="e.g. IRONMAN 70.3 Tasmania",
+                placeholder="Ví dụ: IRONMAN 70.3 Tasmania",
             )
             st.session_state["custom_location"] = custom_loc
             final_location = custom_loc
@@ -331,12 +332,12 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             final_location = selected_loc
 
         year_val = st.number_input(
-            "5. EVENT YEAR (eventyear)",
+            "5. NĂM THI ĐẤU (eventyear)",
             min_value=2004,
             max_value=2030,
             value=int(st.session_state["eventyear"]),
             step=1,
-            help="Evaluation I fit: 2004–2016 (test 2019–2020). Evaluation II fit: 2004–2018 (test 2021–2023).",
+            help="Evaluation I huấn luyện: 2004–2016 (kiểm thử 2019–2020). Evaluation II huấn luyện: 2004–2018 (kiểm thử 2021–2023).",
         )
         st.session_state["eventyear"] = int(year_val)
 
@@ -349,26 +350,26 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 """
                 <div class="nb-card" style="background-color: #74B9FF; padding: 0.75rem 1rem; margin-top: 0.75rem; margin-bottom: 0.5rem;">
                     <span style="font-family: var(--font-mono); font-weight: 700; font-size: 0.86rem;">
-                        CHECKPOINT C1 UNLOCKED · ENTER ACTUAL 1.9 KM SWIM TIME (HH:MM:SS)
+                        MỞ KHÓA MỐC C1 (SAU CHẶNG BƠI) · NHẬP THỜI GIAN BƠI 1.9 KM THỰC TẾ (HH:MM:SS)
                     </span>
                 </div>
                 """
             )
             sw_c1, sw_c2, sw_c3 = st.columns(3)
             with sw_c1:
-                sh = st.number_input("SWIM HOURS", min_value=0, max_value=3, value=int(st.session_state["swim_h"]), step=1)
+                sh = st.number_input("GIỜ BƠI", min_value=0, max_value=3, value=int(st.session_state["swim_h"]), step=1)
                 st.session_state["swim_h"] = int(sh)
             with sw_c2:
-                sm = st.number_input("SWIM MINUTES", min_value=0, max_value=59, value=int(st.session_state["swim_m"]), step=1)
+                sm = st.number_input("PHÚT BƠI", min_value=0, max_value=59, value=int(st.session_state["swim_m"]), step=1)
                 st.session_state["swim_m"] = int(sm)
             with sw_c3:
-                ss = st.number_input("SWIM SECONDS", min_value=0, max_value=59, value=int(st.session_state["swim_s"]), step=1)
+                ss = st.number_input("GIÂY BƠI", min_value=0, max_value=59, value=int(st.session_state["swim_s"]), step=1)
                 st.session_state["swim_s"] = int(ss)
 
             swim_seconds_val = hms_to_seconds(sh, sm, ss)
             st.caption(
-                f"Entered SwimTime: **{format_seconds_hms(swim_seconds_val)}** = **`{swim_seconds_val:,.0f}` seconds** "
-                f"({swim_seconds_val/60:,.2f} min)"
+                f"Thời gian bơi đã nhập (`swimtime`): **{format_seconds_hms(swim_seconds_val)}** = **`{swim_seconds_val:,.0f}` giây** "
+                f"({swim_seconds_val/60:,.2f} phút)"
             )
 
         if current_cp == "C2":
@@ -376,35 +377,35 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 """
                 <div class="nb-card" style="background-color: #88D498; padding: 0.75rem 1rem; margin-top: 0.75rem; margin-bottom: 0.5rem;">
                     <span style="font-family: var(--font-mono); font-weight: 700; font-size: 0.86rem;">
-                        CHECKPOINT C2 UNLOCKED · ENTER ACTUAL 90 KM BIKE TIME (HH:MM:SS)
+                        MỞ KHÓA MỐC C2 (SAU CHẶNG ĐẠP XE) · NHẬP THỜI GIAN ĐẠP XE 90 KM THỰC TẾ (HH:MM:SS)
                     </span>
                 </div>
                 """
             )
             bk_c1, bk_c2, bk_c3 = st.columns(3)
             with bk_c1:
-                bh = st.number_input("BIKE HOURS", min_value=0, max_value=7, value=int(st.session_state["bike_h"]), step=1)
+                bh = st.number_input("GIỜ ĐẠP XE", min_value=0, max_value=7, value=int(st.session_state["bike_h"]), step=1)
                 st.session_state["bike_h"] = int(bh)
             with bk_c2:
-                bm = st.number_input("BIKE MINUTES", min_value=0, max_value=59, value=int(st.session_state["bike_m"]), step=1)
+                bm = st.number_input("PHÚT ĐẠP XE", min_value=0, max_value=59, value=int(st.session_state["bike_m"]), step=1)
                 st.session_state["bike_m"] = int(bm)
             with bk_c3:
-                bs = st.number_input("BIKE SECONDS", min_value=0, max_value=59, value=int(st.session_state["bike_s"]), step=1)
+                bs = st.number_input("GIÂY ĐẠP XE", min_value=0, max_value=59, value=int(st.session_state["bike_s"]), step=1)
                 st.session_state["bike_s"] = int(bs)
 
             bike_seconds_val = hms_to_seconds(bh, bm, bs)
             st.caption(
-                f"Entered BikeTime: **{format_seconds_hms(bike_seconds_val)}** = **`{bike_seconds_val:,.0f}` seconds** "
-                f"({bike_seconds_val/60:,.2f} min)"
+                f"Thời gian đạp xe đã nhập (`biketime`): **{format_seconds_hms(bike_seconds_val)}** = **`{bike_seconds_val:,.0f}` giây** "
+                f"({bike_seconds_val/60:,.2f} phút)"
             )
 
         # Quick Advance Checkpoint Button
         if current_cp == "C0":
-            if st.button("→ COMPLETE SWIM & ADVANCE TO C1 (AFTER SWIM)", key="adv_c1", use_container_width=True):
+            if st.button("→ HOÀN THÀNH BƠI & CHUYỂN SANG MỐC C1 (SAU CHẶNG BƠI)", key="adv_c1", use_container_width=True):
                 st.session_state["live_cp"] = "C1"
                 st.rerun()
         elif current_cp == "C1":
-            if st.button("→ COMPLETE BIKE & ADVANCE TO C2 (AFTER BIKE)", key="adv_c2", use_container_width=True):
+            if st.button("→ HOÀN THÀNH ĐẠP XE & CHUYỂN SANG MỐC C2 (SAU CHẶNG ĐẠP XE)", key="adv_c2", use_container_width=True):
                 st.session_state["live_cp"] = "C2"
                 st.rerun()
 
@@ -427,7 +428,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             render_html(
                 f"""
                 <div class="nb-card" style="background-color: #FF6B6B;">
-                    <div class="nb-section-header">INPUT VALIDATION ERROR</div>
+                    <div class="nb-section-header">LỖI KIỂM TRA DỮ LIỆU ĐẦU VÀO</div>
                     <ul style="margin: 0; padding-left: 1.25rem; font-weight: 700;">{err_items}</ul>
                 </div>
                 """
@@ -501,8 +502,8 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 f"""
                 <div class="nb-card">
                     <div class="nb-section-header">
-                        <span>EXACT FEATURE VECTOR PASSED TO {active_res["model_file"]}</span>
-                        <span class="nb-badge">{len(active_res["features_used"])} FEATURES</span>
+                        <span>VÉC-TƠ ĐẶC TRƯNG ĐẦU VÀO TRUYỀN TỚI {active_res["model_file"]}</span>
+                        <span class="nb-badge">{len(active_res["features_used"])} ĐẶC TRƯNG</span>
                     </div>
                     <div>{feat_badges}</div>
                 </div>
@@ -515,11 +516,11 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
         b0_s = active_res["B0"]
         rows_html += (
             f"<tr>"
-            f"<td>B0 (Global Fit Median)</td>"
+            f"<td>Baseline B0 (Trung vị toàn tập huấn luyện)</td>"
             f"<td>{current_cp}</td>"
-            f"<td>{active_res['baseline_file']}</td>"
+            f"<td>Tra cứu trực tiếp ({active_res['baseline_file']})</td>"
             f"<td>{format_seconds_hms(b0_s)}</td>"
-            f"<td>{b0_s:,.1f} s</td>"
+            f"<td>{b0_s:,.1f} giây</td>"
             f"<td>{format_seconds_hms(active_res['CatBoost_ref'] - b0_s, signed=True)}</td>"
             f"</tr>"
         )
@@ -527,22 +528,22 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             b1_s = active_res["B1"]
             rows_html += (
                 f"<tr>"
-                f"<td>B1 (Pre-Race Gender×Age Median)</td>"
+                f"<td>Baseline B1 (Trung vị Giới tính × Nhóm tuổi trước đua)</td>"
                 f"<td>C0</td>"
-                f"<td>{active_res['matched_level']} (n={active_res['matched_group_size']:,})</td>"
+                f"<td>Tra cứu nhóm {active_res['matched_level']} (n={active_res['matched_group_size']:,})</td>"
                 f"<td>{format_seconds_hms(b1_s)}</td>"
-                f"<td>{b1_s:,.1f} s</td>"
+                f"<td>{b1_s:,.1f} giây</td>"
                 f"<td>{format_seconds_hms(active_res['CatBoost_ref'] - b1_s, signed=True)}</td>"
                 f"</tr>"
             )
         b2_s = active_res["B2"]
         rows_html += (
             f"<tr>"
-            f"<td>B2 (Known Splits + Group Median)</td>"
+            f"<td>Baseline B2 (Tổng chặng đã biết + Trung vị phần còn lại)</td>"
             f"<td>{current_cp}</td>"
-            f"<td>{active_res['matched_level']} (n={active_res['matched_group_size']:,})</td>"
+            f"<td>Tra cứu nhóm {active_res['matched_level']} (n={active_res['matched_group_size']:,})</td>"
             f"<td>{format_seconds_hms(b2_s)}</td>"
-            f"<td>{b2_s:,.1f} s</td>"
+            f"<td>{b2_s:,.1f} giây</td>"
             f"<td>{format_seconds_hms(active_res['CatBoost_ref'] - b2_s, signed=True)}</td>"
             f"</tr>"
         )
@@ -553,7 +554,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 cb_val = r_cp["CatBoost_ref"]
                 row_cls = f"nb-row-highlight-{cp_key}" if cp_key == current_cp else ""
                 delta_str = (
-                    "ACTIVE REFERENCE"
+                    "MỐC ĐANG CHỌN"
                     if cp_key == current_cp
                     else format_seconds_hms(active_res["CatBoost_ref"] - cb_val, signed=True)
                 )
@@ -561,9 +562,9 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                     f'<tr class="{row_cls}">'
                     f"<td>★ CatBoost_ref ({r_cp['model_file']})</td>"
                     f"<td>{cp_key}</td>"
-                    f"<td>Live CatBoost Inference (seed=42)</td>"
+                    f"<td>Suy luận trực tiếp CatBoost (seed=42)</td>"
                     f"<td>{format_seconds_hms(cb_val)}</td>"
-                    f"<td>{cb_val:,.2f} s</td>"
+                    f"<td>{cb_val:,.2f} giây</td>"
                     f"<td>{delta_str}</td>"
                     f"</tr>"
                 )
@@ -572,19 +573,19 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             f"""
             <div class="nb-card">
                 <div class="nb-section-header">
-                    <span>LIVE INFERENCE COMPARISON (CATBOOST_REF VS. EMPIRICAL BASELINES)</span>
-                    <span class="nb-badge nb-badge-black">LIVE OFFLINE INFERENCE</span>
+                    <span>SO SÁNH MÔ HÌNH (SUY LUẬN TRỰC TIẾP CATBOOST_REF VÀ BASELINE B0, B1, B2)</span>
+                    <span class="nb-badge nb-badge-black">CHẾ ĐỘ NGOẠI TUYẾN</span>
                 </div>
                 <div class="nb-table-wrap">
                     <table class="nb-table">
                         <thead>
                             <tr>
-                                <th style="width: 26%;">Method / Artifact</th>
-                                <th style="width: 8%;">CP</th>
-                                <th style="width: 24%;">Inference Source</th>
-                                <th style="width: 14%;">Predicted (HH:MM:SS)</th>
-                                <th style="width: 14%;">Exact Seconds</th>
-                                <th style="width: 14%;">Active CB Δ</th>
+                                <th style="width: 27%;">Phương pháp / Mô hình</th>
+                                <th style="width: 7%;">Mốc</th>
+                                <th style="width: 24%;">Nguồn suy luận</th>
+                                <th style="width: 14%;">Thời gian về đích dự đoán</th>
+                                <th style="width: 14%;">Số giây chính xác</th>
+                                <th style="width: 14%;">Chênh lệch với CB hiện tại</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -593,10 +594,10 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                     </table>
                 </div>
                 <p style="font-size: 0.82rem; font-family: var(--font-mono); margin: 0;">
-                    <b>Scientific Integrity Note:</b> Only the 6 CatBoost models (<code>models/*.cbm</code>) and 6 baseline lookup tables
-                    (<code>models/*_baseline.csv</code>) are persisted in the repository for live inference. Linear Regression (LR) and
-                    Random Forest (RF) do not have saved model weights in <code>models/</code>, so live LR/RF predictions are never fabricated.
-                    To inspect saved LR and RF predictions on real test athletes, switch to <b>Mode B: Real Test Replay</b>.
+                    <b>Ghi chú tính toàn vẹn khoa học:</b> Trong kho mã nguồn, chỉ có 6 mô hình CatBoost (<code>models/*.cbm</code>) và 6 bảng tra cứu Baseline
+                    (<code>models/*_baseline.csv</code>) được lưu trữ để suy luận trực tiếp. Hai mô hình Hồi quy tuyến tính (<code>LR</code>) và Rừng ngẫu nhiên (<code>RF</code>)
+                    không lưu file trọng số trong <code>models/</code>, do đó hệ thống tuyệt đối không tự tạo dự đoán LR/RF giả lập ở chế độ trực tiếp.
+                    Để đối chiếu kết quả dự đoán LR và RF đã lưu trên các vận động viên thực tế, vui lòng chuyển sang <b>Chế độ B: Xem lại dữ liệu kiểm thử</b>.
                 </p>
             </div>
             """
@@ -608,7 +609,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
 
 
 # =============================================================================
-# MODE B: REAL TEST REPLAY (10 SAVED EXAMPLES FROM metrics/example.csv)
+# CHẾ ĐỘ B: XEM LẠI DỮ LIỆU KIỂM THỬ (10 LƯỢT THI TRONG metrics/example.csv)
 # =============================================================================
 else:
     ex_df = engine.load_example_predictions()
@@ -621,17 +622,17 @@ else:
 
     rcp_1, rcp_2, rcp_3 = st.columns(3)
     with rcp_1:
-        lbl0 = "● REPLAY C0 — BEFORE RACE" if replay_cp == "C0" else "REPLAY C0 — BEFORE RACE"
+        lbl0 = "● XEM MỐC C0 — TRƯỚC CUỘC ĐUA" if replay_cp == "C0" else "XEM MỐC C0 — TRƯỚC CUỘC ĐUA"
         if st.button(lbl0, key="btn_rep_c0", use_container_width=True):
             st.session_state["replay_cp"] = "C0"
             st.rerun()
     with rcp_2:
-        lbl1 = "● REPLAY C1 — AFTER SWIM" if replay_cp == "C1" else "REPLAY C1 — AFTER SWIM"
+        lbl1 = "● XEM MỐC C1 — SAU CHẶNG BƠI" if replay_cp == "C1" else "XEM MỐC C1 — SAU CHẶNG BƠI"
         if st.button(lbl1, key="btn_rep_c1", use_container_width=True):
             st.session_state["replay_cp"] = "C1"
             st.rerun()
     with rcp_3:
-        lbl2 = "● REPLAY C2 — AFTER BIKE" if replay_cp == "C2" else "REPLAY C2 — AFTER BIKE"
+        lbl2 = "● XEM MỐC C2 — SAU CHẶNG ĐẠP XE" if replay_cp == "C2" else "XEM MỐC C2 — SAU CHẶNG ĐẠP XE"
         if st.button(lbl2, key="btn_rep_c2", use_container_width=True):
             st.session_state["replay_cp"] = "C2"
             st.rerun()
@@ -643,12 +644,12 @@ else:
             """
             <div class="nb-card">
                 <div class="nb-section-header">
-                    <span>REAL TEST ATHLETE SELECTION</span>
+                    <span>THÔNG TIN VẬN ĐỘNG VIÊN KIỂM THỬ</span>
                     <span class="nb-badge nb-badge-black">metrics/example.csv</span>
                 </div>
                 <p style="font-size: 0.88rem; margin-bottom: 0.5rem;">
-                    Displays the 10 authentic test records from <code>metrics/example.csv</code> (Evaluation II, EventYear 2021, RaceID 774).
-                    All predictions (<code>B0, B1, B2, LR, RF, CatBoost_ref</code>) are read directly from the saved file without reconstruction or modification.
+                    Trình chiếu 10 lượt thi đấu thực tế trong tập kiểm thử từ file <code>metrics/example.csv</code> (Evaluation II, năm 2021, mã giải RaceID 774).
+                    Toàn bộ kết quả dự đoán (<code>B0, B1, B2, LR, RF, CatBoost_ref</code>) được đọc nguyên bản từ dữ liệu đã lưu, không tái tạo hay chỉnh sửa.
                 </p>
             </div>
             """
@@ -657,10 +658,10 @@ else:
         available_rids = sorted(ex_df["resultid"].unique().tolist())
         rid_idx = available_rids.index(replay_rid) if replay_rid in available_rids else 0
         chosen_rid = st.selectbox(
-            "SELECT SAVED TEST RECORD (resultid)",
+            "CHỌN BẢN GHI VẬN ĐỘNG VIÊN KIỂM THỬ (resultid)",
             options=available_rids,
             index=rid_idx,
-            format_func=lambda r: f"Test Athlete #{available_rids.index(r)+1:02d} · resultid={r} (Race 774 · 2021)",
+            format_func=lambda r: f"Vận động viên #{available_rids.index(r)+1:02d} · resultid={r} (Giải 774 · Năm 2021)",
         )
         if chosen_rid != replay_rid:
             st.session_state["replay_resultid"] = int(chosen_rid)
@@ -677,23 +678,23 @@ else:
             """
             <div class="nb-card" style="margin-top: 0.75rem;">
                 <div class="nb-section-header">
-                    <span>ACTUAL FINISH TIME CONTROL</span>
-                    <span class="nb-badge nb-badge-accent">FINAL STEP REVEAL</span>
+                    <span>ĐIỀU KHIỂN THỜI GIAN VỀ ĐÍCH THỰC TẾ</span>
+                    <span class="nb-badge nb-badge-accent">MỞ Ở BƯỚC CUỐI</span>
                 </div>
                 <p style="font-size: 0.86rem; margin-bottom: 0.5rem;">
-                    Per experimental demo guidelines (<i>"Khi làm demo chỉ mở actual ở bước cuối"</i>),
-                    the athlete's actual finish time remains hidden until you explicitly click the reveal button below.
+                    Theo đúng quy trình trình diễn nghiên cứu (<i>"Khi làm demo chỉ mở actual ở bước cuối"</i>),
+                    thời gian về đích thực tế của vận động viên được ẩn mặc định cho đến khi bạn nhấn nút hiển thị bên dưới.
                 </p>
             </div>
             """
         )
 
         if not reveal_actual:
-            if st.button("REVEAL ACTUAL FINISH TIME", key="btn_reveal_actual", type="primary", use_container_width=True):
+            if st.button("HIỂN THỊ THỜI GIAN VỀ ĐÍCH THỰC TẾ", key="btn_reveal_actual", type="primary", use_container_width=True):
                 st.session_state["replay_reveal_actual"] = True
                 st.rerun()
         else:
-            if st.button("HIDE ACTUAL FINISH TIME", key="btn_hide_actual", use_container_width=True):
+            if st.button("ẨN THỜI GIAN VỀ ĐÍCH THỰC TẾ", key="btn_hide_actual", use_container_width=True):
                 st.session_state["replay_reveal_actual"] = False
                 st.rerun()
 
@@ -701,9 +702,9 @@ else:
             render_html(
                 f"""
                 <div class="nb-hero-card" style="background-color: #FF6B6B; padding: 1.1rem 1.4rem; margin-top: 0.75rem;">
-                    <div class="nb-pred-label">★ REVEALED ACTUAL FINISH TIME · RESULTID #{chosen_rid}</div>
+                    <div class="nb-pred-label">★ THỜI GIAN VỀ ĐÍCH THỰC TẾ · RESULTID #{chosen_rid}</div>
                     <div style="font-family: var(--font-mono); font-size: 2.6rem; font-weight: 700;">{format_seconds_hms(actual_sec_val)}</div>
-                    <span class="nb-pred-seconds">EXACT ACTUAL: {actual_sec_val:,.1f} SECONDS ({actual_sec_val/60:,.2f} MINUTES)</span>
+                    <span class="nb-pred-seconds">THỰC TẾ CHÍNH XÁC: {actual_sec_val:,.1f} GIÂY ({actual_sec_val/60:,.2f} PHÚT)</span>
                 </div>
                 """
             )
@@ -711,7 +712,7 @@ else:
             render_html(
                 """
                 <div class="nb-card" style="background-color: #FFFDF5; border-style: dashed; margin-top: 0.75rem;">
-                    <span style="font-family: var(--font-mono); font-weight: 700;">🔒 ACTUAL FINISH TIME: LOCKED / HIDDEN (Click "REVEAL ACTUAL FINISH TIME" above to unlock)</span>
+                    <span style="font-family: var(--font-mono); font-weight: 700;">🔒 THỜI GIAN VỀ ĐÍCH THỰC TẾ: ĐANG ẨN (Nhấn "HIỂN THỊ THỜI GIAN VỀ ĐÍCH THỰC TẾ" ở trên để mở)</span>
                 </div>
                 """
             )
@@ -745,7 +746,7 @@ else:
             err_sec = cb_pred_sec - actual_sec_val
             err_badge = (
                 f'<span class="nb-badge nb-badge-accent">'
-                f'ERROR VS ACTUAL: {format_seconds_hms(err_sec, signed=True)} ({err_sec/60:+.2f} min | |err|={abs(err_sec)/60:.2f} min)'
+                f'SAI SỐ SO VỚI THỰC TẾ: {format_seconds_hms(err_sec, signed=True)} ({err_sec/60:+.2f} phút | |MAE|={abs(err_sec)/60:.2f} phút)'
                 f'</span>'
             )
 
@@ -754,11 +755,11 @@ else:
             f"""
             <div class="nb-hero-card nb-hero-{replay_cp}">
                 <div class="nb-pred-label">
-                    SAVED TEST PREDICTION · RESULTID #{chosen_rid} · RACEID #{race_id_val} ({event_yr_val}) · CHECKPOINT {replay_cp} · CatBoost_ref (seed=42)
+                    THỜI GIAN VỀ ĐÍCH DỰ ĐOÁN (ĐÃ LƯU) · RESULTID #{chosen_rid} · GIẢI #{race_id_val} ({event_yr_val}) · MỐC {replay_cp} · CatBoost_ref (seed=42)
                 </div>
                 <div class="nb-pred-time">{format_seconds_hms(cb_pred_sec)}</div>
                 <div style="margin-bottom: 0.75rem;">
-                    <span class="nb-pred-seconds">SAVED VALUE: {cb_pred_sec:,.8f} SECONDS ({cb_pred_sec/60:,.2f} MINUTES)</span>
+                    <span class="nb-pred-seconds">GIÁ TRỊ ĐÃ LƯU: {cb_pred_sec:,.8f} GIÂY ({cb_pred_sec/60:,.2f} PHÚT)</span>
                 </div>
                 <div>
                     <span class="nb-badge">C0 CatBoost_ref: {format_seconds_hms(c0_cb_sec)}</span>
@@ -789,10 +790,10 @@ else:
         if reveal_actual:
             diff_s = p_sec - actual_sec_val
             actual_col = format_seconds_hms(actual_sec_val)
-            err_col = f"{format_seconds_hms(diff_s, signed=True)} ({abs(diff_s)/60:.2f}m)"
+            err_col = f"{format_seconds_hms(diff_s, signed=True)} ({abs(diff_s)/60:.2f} phút)"
         else:
-            actual_col = "🔒 HIDDEN"
-            err_col = "🔒 HIDDEN"
+            actual_col = "🔒 ĐANG ẨN"
+            err_col = "🔒 ĐANG ẨN"
 
         t_rows_html += (
             f'<tr class="{row_cls}">'
@@ -800,7 +801,7 @@ else:
             f"<td>{m_seed}</td>"
             f"<td>{replay_cp}</td>"
             f"<td>{format_seconds_hms(p_sec)}</td>"
-            f"<td>{p_sec:,.2f} s</td>"
+            f"<td>{p_sec:,.2f} giây</td>"
             f"<td>{actual_col}</td>"
             f"<td>{err_col}</td>"
             f"</tr>"
@@ -810,20 +811,20 @@ else:
         f"""
         <div class="nb-card">
             <div class="nb-section-header">
-                <span>SAVED PREDICTIONS AT CHECKPOINT {replay_cp} (RESULTID #{chosen_rid})</span>
-                <span class="nb-badge">{len(cp_rows)} SAVED METHODS</span>
+                <span>SO SÁNH MÔ HÌNH ĐÃ LƯU TẠI MỐC {replay_cp} (RESULTID #{chosen_rid})</span>
+                <span class="nb-badge">{len(cp_rows)} PHƯƠNG PHÁP ĐÃ LƯU</span>
             </div>
             <div class="nb-table-wrap">
                 <table class="nb-table">
                     <thead>
                         <tr>
-                            <th style="width: 18%;">Model</th>
+                            <th style="width: 18%;">Mô hình</th>
                             <th style="width: 8%;">Seed</th>
-                            <th style="width: 8%;">CP</th>
-                            <th style="width: 16%;">Predicted</th>
-                            <th style="width: 16%;">Seconds</th>
-                            <th style="width: 14%;">Actual</th>
-                            <th style="width: 20%;">Error (|MAE|)</th>
+                            <th style="width: 8%;">Mốc</th>
+                            <th style="width: 16%;">Thời gian dự đoán</th>
+                            <th style="width: 16%;">Số giây</th>
+                            <th style="width: 14%;">Thực tế</th>
+                            <th style="width: 20%;">Sai số (|MAE|)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -841,18 +842,18 @@ else:
         m_sub = athlete_rows.loc[athlete_rows["model"] == m_name].set_index("checkpoint")
         if m_sub.empty:
             continue
-        c0_v = format_seconds_hms(float(m_sub.loc["C0", "pred_finish_seconds"])) if "C0" in m_sub.index else "N/A (C0 only)"
+        c0_v = format_seconds_hms(float(m_sub.loc["C0", "pred_finish_seconds"])) if "C0" in m_sub.index else "Chỉ có ở C0"
         c1_v = format_seconds_hms(float(m_sub.loc["C1", "pred_finish_seconds"])) if "C1" in m_sub.index else "—"
         c2_v = format_seconds_hms(float(m_sub.loc["C2", "pred_finish_seconds"])) if "C2" in m_sub.index else "—"
         hl = f"nb-row-highlight-{replay_cp}" if m_name == "CatBoost_ref" else ""
         if reveal_actual and "C2" in m_sub.index:
             c2_err = abs(float(m_sub.loc["C2", "pred_finish_seconds"]) - actual_sec_val) / 60.0
-            c2_err_str = f"{c2_err:.2f} min"
+            c2_err_str = f"{c2_err:.2f} phút"
         elif reveal_actual and "C0" in m_sub.index:
             c0_err = abs(float(m_sub.loc["C0", "pred_finish_seconds"]) - actual_sec_val) / 60.0
-            c2_err_str = f"{c0_err:.2f} min (C0)"
+            c2_err_str = f"{c0_err:.2f} phút (C0)"
         else:
-            c2_err_str = "🔒 HIDDEN"
+            c2_err_str = "🔒 ĐANG ẨN"
 
         pivot_rows_html += (
             f'<tr class="{hl}">'
@@ -868,18 +869,18 @@ else:
         f"""
         <div class="nb-card">
             <div class="nb-section-header">
-                <span>C0 → C1 → C2 PROGRESSION MATRIX (RESULTID #{chosen_rid})</span>
+                <span>MA TRẬN TIẾN TRÌNH DỰ ĐOÁN C0 → C1 → C2 (RESULTID #{chosen_rid})</span>
                 <span class="nb-badge">EVALUATION II</span>
             </div>
             <div class="nb-table-wrap">
                 <table class="nb-table">
                     <thead>
                         <tr>
-                            <th>Model</th>
-                            <th>C0 (Before Race)</th>
-                            <th>C1 (After Swim)</th>
-                            <th>C2 (After Bike)</th>
-                            <th>Final |Error|</th>
+                            <th>Mô hình</th>
+                            <th>C0 (Trước cuộc đua)</th>
+                            <th>C1 (Sau chặng bơi)</th>
+                            <th>C2 (Sau chặng đạp xe)</th>
+                            <th>Sai số tuyệt đối cuối</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -888,9 +889,8 @@ else:
                 </table>
             </div>
             <p style="font-size: 0.80rem; font-family: var(--font-mono); margin: 0;">
-                Note: In the original experimental design (<code>scripts/run.py</code>), <code>B1</code> is defined specifically
-                at pre-race checkpoint <code>C0</code> (where <code>B1 == B2</code>). At <code>C1</code> and <code>C2</code>,
-                the demographic remainder baseline is reported as <code>B2</code>.
+                Ghi chú: Theo thiết kế thực nghiệm gốc (<code>scripts/run.py</code>), <code>Baseline B1</code> được định nghĩa riêng tại mốc trước cuộc đua
+                <code>C0</code> (nơi <code>B1 == B2</code>). Tại mốc <code>C1</code> và <code>C2</code>, đường cơ sở trung vị phần còn lại theo nhân khẩu học được báo cáo dưới tên <code>B2</code>.
             </p>
         </div>
         """
@@ -898,11 +898,11 @@ else:
 
 
 # =============================================================================
-# 10. SUPPORTING METHODOLOGY & OFFICIAL BENCHMARK METRICS (metrics/all_models.csv)
+# 10. THÔNG TIN PHƯƠNG PHÁP NGHIÊN CỨU & KẾT QUẢ ĐÁNH GIÁ (metrics/all_models.csv)
 # =============================================================================
 st.markdown("<hr style='border: 2px solid #000000; margin: 1.5rem 0;'>", unsafe_allow_html=True)
 
-with st.expander("📘 OFFICIAL EXPERIMENTAL BENCHMARK RESULTS & RESEARCH METHODOLOGY (metrics/all_models.csv)", expanded=False):
+with st.expander("📘 KẾT QUẢ THỰC NGHIỆM TOÀN TẬP & PHƯƠNG PHÁP NGHIÊN CỨU (metrics/all_models.csv)", expanded=False):
     all_models_df = engine.load_all_models_metrics()
     cohort_df = engine.load_cohort_metrics()
     snap_info = engine.load_snapshot_comparison()
@@ -918,23 +918,23 @@ with st.expander("📘 OFFICIAL EXPERIMENTAL BENCHMARK RESULTS & RESEARCH METHOD
         plt.close(fig_m1)
 
     disp_df = all_models_df.copy()
-    disp_df["mae_minutes"] = disp_df["mae_minutes"].map(lambda x: f"{x:.2f} min")
-    disp_df["rmse_minutes"] = disp_df["rmse_minutes"].map(lambda x: f"{x:.2f} min")
-    disp_df["bias_minutes"] = disp_df["bias_minutes"].map(lambda x: f"{x:+.2f} min")
-    disp_df["p90_abs_minutes"] = disp_df["p90_abs_minutes"].map(lambda x: f"{x:.2f} min")
+    disp_df["mae_minutes"] = disp_df["mae_minutes"].map(lambda x: f"{x:.2f} phút")
+    disp_df["rmse_minutes"] = disp_df["rmse_minutes"].map(lambda x: f"{x:.2f} phút")
+    disp_df["bias_minutes"] = disp_df["bias_minutes"].map(lambda x: f"{x:+.2f} phút")
+    disp_df["p90_abs_minutes"] = disp_df["p90_abs_minutes"].map(lambda x: f"{x:.2f} phút")
 
     render_html(
         f"""
         <div class="nb-card">
             <div class="nb-section-header">
-                <span>VERIFIED RESEARCH METHODOLOGY SUMMARY</span>
-                <span class="nb-badge nb-badge-c2">1,152,658 ELIGIBLE RECORDS</span>
+                <span>TÓM TẮT PHƯƠNG PHÁP NGHIÊN CỨU ĐÃ KIỂM CHỨNG</span>
+                <span class="nb-badge nb-badge-c2">1,152,658 BẢN GHI HỢP LỆ</span>
             </div>
             <ul style="font-size: 0.9rem; line-height: 1.5; margin-bottom: 0;">
-                <li><b>Unified Cohort & Snapshot Verification:</b> {snap_info['drive_eligible']:,} eligible Age-Group records across {int(cohort_df['races'].sum()):,} race editions (2004–2023), verified with 0 discrepancies between Google Drive CSVs and Supabase view <code>vw_valid_c1c2</code>.</li>
-                <li><b>Temporal Evaluation Splits:</b> <b>Evaluation I</b> fits on 2004–2016 (n = 495,489) and tests on 2019–2020 (n = 125,912 across 127 races). <b>Evaluation II</b> fits on 2004–2018 (n = 697,267) and tests on 2021–2023 (n = 329,366 post-QC across 258 races; 113 records with <code>FinishTime &lt;= SwimTime + BikeTime</code> excluded in final QC).</li>
-                <li><b>Baselines:</b> <code>B0</code> = global fit median FinishTime; <code>B1</code> = pre-race median by <code>gender × agegroup</code>; <code>B2</code> = known split sum + median remaining time by <code>gender × agegroup</code> (fallback to <code>gender</code> then <code>all</code> if group size &lt; 30).</li>
-                <li><b>CatBoost Reference Configuration (<code>CatBoost_ref</code>):</b> 120 iterations, depth 6, learning_rate 0.08, L2 leaf reg 3, RMSE loss, seed 42.</li>
+                <li><b>Bộ dữ liệu thống nhất & Đối chiếu Snapshot:</b> {snap_info['drive_eligible']:,} lượt hoàn thành hợp lệ thuộc nhóm tuổi Age-Group qua {int(cohort_df['races'].sum()):,} giải đấu (2004–2023), khớp tuyệt đối 100% giữa bộ CSV trên Google Drive và view <code>vw_valid_c1c2</code> trên Supabase.</li>
+                <li><b>Hai giai đoạn đánh giá theo thời gian:</b> <b>Evaluation I</b> huấn luyện trên giai đoạn 2004–2016 (n = 495,489) và kiểm thử trên 2019–2020 (n = 125,912 qua 127 giải). <b>Evaluation II</b> huấn luyện trên 2004–2018 (n = 697,267) và kiểm thử trên 2021–2023 (n = 329,366 sau bước lọc QC qua 258 giải; loại bỏ 113 bản ghi có <code>FinishTime &lt;= SwimTime + BikeTime</code>).</li>
+                <li><b>Các mô hình Baseline:</b> <code>B0</code> = trung vị FinishTime toàn tập huấn luyện; <code>B1</code> = trung vị trước cuộc đua theo <code>gender × agegroup</code>; <code>B2</code> = tổng thời gian các chặng đã hoàn thành + trung vị phần thời gian còn lại theo <code>gender × agegroup</code> (lùi về <code>gender</code> rồi <code>all</code> nếu cỡ mẫu nhóm &lt; 30).</li>
+                <li><b>Cấu hình tham chiếu CatBoost (<code>CatBoost_ref</code>) & Chỉ số Đánh giá (<code>MAE, RMSE, P90</code>):</b> 120 vòng lặp (iterations), độ sâu cây (depth) = 6, tốc độ học (learning_rate) = 0.08, L2 leaf reg = 3, hàm mất mát RMSE, random_seed = 42. Bảng dưới báo cáo đầy đủ <code>MAE</code>, <code>RMSE</code>, độ lệch (bias) và phân vị 90 sai số tuyệt đối (<code>P90</code>) theo đơn vị phút.</li>
             </ul>
         </div>
         """

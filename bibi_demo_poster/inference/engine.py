@@ -30,42 +30,42 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # Active country ISO2 codes verified from the trained CatBoost models + standard options
 ACTIVE_COUNTRIES: List[Tuple[str, str]] = [
-    ("US", "US — United States"),
-    ("VN", "VN — Vietnam"),
-    ("AU", "AU — Australia"),
-    ("GB", "GB — United Kingdom"),
-    ("DE", "DE — Germany"),
-    ("FR", "FR — France"),
+    ("US", "US — Hoa Kỳ"),
+    ("VN", "VN — Việt Nam"),
+    ("AU", "AU — Úc"),
+    ("GB", "GB — Vương quốc Anh"),
+    ("DE", "DE — Đức"),
+    ("FR", "FR — Pháp"),
     ("CA", "CA — Canada"),
-    ("CH", "CH — Switzerland"),
-    ("AT", "AT — Austria"),
+    ("CH", "CH — Thụy Sĩ"),
+    ("AT", "AT — Áo"),
     ("BR", "BR — Brazil"),
-    ("CN", "CN — China"),
+    ("CN", "CN — Trung Quốc"),
     ("CO", "CO — Colombia"),
-    ("DK", "DK — Denmark"),
+    ("DK", "DK — Đan Mạch"),
     ("EC", "EC — Ecuador"),
-    ("ES", "ES — Spain"),
+    ("ES", "ES — Tây Ban Nha"),
     ("ID", "ID — Indonesia"),
     ("IE", "IE — Ireland"),
-    ("IN", "IN — India"),
-    ("IT", "IT — Italy"),
-    ("JP", "JP — Japan"),
-    ("KR", "KR — South Korea"),
+    ("IN", "IN — Ấn Độ"),
+    ("IT", "IT — Ý"),
+    ("JP", "JP — Nhật Bản"),
+    ("KR", "KR — Hàn Quốc"),
     ("MX", "MX — Mexico"),
     ("MY", "MY — Malaysia"),
-    ("NA", "NA — Namibia (Preserved ISO code)"),
-    ("NO", "NO — Norway"),
+    ("NA", "NA — Namibia (Bảo toàn mã ISO)"),
+    ("NO", "NO — Na Uy"),
     ("NZ", "NZ — New Zealand"),
     ("PH", "PH — Philippines"),
-    ("PL", "PL — Poland"),
+    ("PL", "PL — Ba Lan"),
     ("PR", "PR — Puerto Rico"),
-    ("SE", "SE — Sweden"),
+    ("SE", "SE — Thụy Điển"),
     ("SG", "SG — Singapore"),
-    ("TH", "TH — Thailand"),
-    ("TW", "TW — Taiwan"),
-    ("ZA", "ZA — South Africa"),
-    ("BE", "BE — Belgium"),
-    ("__MISSING__", "__MISSING__ — Unspecified Country"),
+    ("TH", "TH — Thái Lan"),
+    ("TW", "TW — Đài Loan"),
+    ("ZA", "ZA — Nam Phi"),
+    ("BE", "BE — Bỉ"),
+    ("__MISSING__", "__MISSING__ — Chưa xác định quốc gia"),
 ]
 
 # Active IRONMAN 70.3 event locations verified directly against the CatBoost model trees
@@ -223,38 +223,38 @@ def validate_athlete_inputs(
     errors: List[str] = []
 
     if checkpoint not in {"C0", "C1", "C2"}:
-        errors.append(f"Invalid checkpoint '{checkpoint}'. Must be C0, C1, or C2.")
+        errors.append(f"Mốc kiểm tra '{checkpoint}' không hợp lệ. Phải là C0, C1 hoặc C2.")
 
     norm_gender = normalize_categorical(gender)
     if norm_gender not in {"M", "F"}:
-        errors.append("Gender must be 'M' (Male) or 'F' (Female).")
+        errors.append("Giới tính (gender) phải là 'M' (Nam) hoặc 'F' (Nữ).")
 
     if agegroup not in valid_agegroups:
-        errors.append(f"AgeGroup must be one of {valid_agegroups}.")
+        errors.append(f"Nhóm tuổi (agegroup) phải thuộc danh sách {valid_agegroups}.")
 
     try:
         yr = int(eventyear)
         if yr < 2004 or yr > 2030:
-            errors.append("EventYear must be between 2004 and 2030.")
+            errors.append("Năm thi đấu (eventyear) phải nằm trong khoảng từ 2004 đến 2030.")
     except (ValueError, TypeError):
-        errors.append("EventYear must be a valid integer year.")
+        errors.append("Năm thi đấu (eventyear) phải là một số nguyên hợp lệ.")
 
     if checkpoint in {"C1", "C2"}:
         if swimtime_seconds is None or not np.isfinite(swimtime_seconds) or swimtime_seconds <= 0:
-            errors.append("SwimTime is required at C1/C2 and must be strictly positive (> 0 seconds).")
+            errors.append("Thời gian bơi (swimtime) là bắt buộc tại mốc C1/C2 và phải lớn hơn 0 giây.")
         elif swimtime_seconds < 600 or swimtime_seconds > 10800:
             errors.append(
-                f"SwimTime ({format_seconds_hms(swimtime_seconds)}) is outside typical IRONMAN 70.3 bounds "
-                "(00:10:00 to 03:00:00). Please verify your input."
+                f"Thời gian bơi ({format_seconds_hms(swimtime_seconds)}) nằm ngoài ngưỡng thông thường của IRONMAN 70.3 "
+                "(00:10:00 đến 03:00:00). Vui lòng kiểm tra lại giá trị nhập."
             )
 
     if checkpoint == "C2":
         if biketime_seconds is None or not np.isfinite(biketime_seconds) or biketime_seconds <= 0:
-            errors.append("BikeTime is required at C2 and must be strictly positive (> 0 seconds).")
+            errors.append("Thời gian đạp xe (biketime) là bắt buộc tại mốc C2 và phải lớn hơn 0 giây.")
         elif biketime_seconds < 2400 or biketime_seconds > 25200:
             errors.append(
-                f"BikeTime ({format_seconds_hms(biketime_seconds)}) is outside typical IRONMAN 70.3 bounds "
-                "(00:40:00 to 07:00:00). Please verify your input."
+                f"Thời gian đạp xe ({format_seconds_hms(biketime_seconds)}) nằm ngoài ngưỡng thông thường của IRONMAN 70.3 "
+                "(00:40:00 đến 07:00:00). Vui lòng kiểm tra lại giá trị nhập."
             )
 
     return (len(errors) == 0), errors
