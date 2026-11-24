@@ -399,7 +399,19 @@ table.nb-table td {
 .nb-table tr.nb-row-actual td { background-color: var(--accent-coral); font-weight: 700; }
 
 /* Streamlit Widget Overrides: Buttons, Inputs, Selectboxes */
-div.stButton > button {
+/* Ensure buttons and containers never fade out during Streamlit Cloud stale/rerun cycles */
+[data-stale="true"],
+[data-testid="stButton"],
+[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-secondary"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+div.stButton > button,
+div[data-testid="stButton"] > button,
+button[data-testid="stBaseButton-primary"],
+button[data-testid="stBaseButton-secondary"] {
     font-family: var(--font-mono) !important;
     font-weight: 700 !important;
     text-transform: uppercase !important;
@@ -411,27 +423,44 @@ div.stButton > button {
     padding: 0.55rem 1rem !important;
     transition: transform 0.1s ease, box-shadow 0.1s ease !important;
     width: 100%;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
-div.stButton > button:hover {
+div.stButton > button:hover,
+div[data-testid="stButton"] > button:hover,
+button[data-testid="stBaseButton-primary"]:hover,
+button[data-testid="stBaseButton-secondary"]:hover {
     transform: translate(-2px, -2px) !important;
     box-shadow: 6px 6px 0px #000000 !important;
     background-color: var(--c0-yellow) !important;
     color: #000000 !important;
+    opacity: 1 !important;
 }
 
-div.stButton > button:active {
+div.stButton > button:active,
+div[data-testid="stButton"] > button:active,
+button[data-testid="stBaseButton-primary"]:active,
+button[data-testid="stBaseButton-secondary"]:active {
     transform: translate(3px, 3px) !important;
     box-shadow: 0px 0px 0px #000000 !important;
+    opacity: 1 !important;
 }
 
-div.stButton > button[kind="primary"] {
+div.stButton > button[kind="primary"],
+div[data-testid="stButton"] > button[kind="primary"],
+button[data-testid="stBaseButton-primary"] {
     background-color: var(--accent-coral) !important;
     color: #000000 !important;
+    opacity: 1 !important;
 }
 
-div.stButton > button[kind="primary"]:hover {
+div.stButton > button[kind="primary"]:hover,
+div[data-testid="stButton"] > button[kind="primary"]:hover,
+button[data-testid="stBaseButton-primary"]:hover {
     background-color: var(--c0-yellow) !important;
+    color: #000000 !important;
+    opacity: 1 !important;
 }
 
 /* Input boxes & select boxes */

@@ -477,48 +477,53 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
 
         st.markdown("<div style='height: 0.45rem;'></div>", unsafe_allow_html=True)
         calc_btn_label = f"TÍNH DỰ ĐOÁN {current_cp}"
-        if st.button(calc_btn_label, key=f"btn_calc_{current_cp}", type="primary", use_container_width=True):
-            if is_valid:
-                c0_computed = engine.predict_checkpoint(
+        calc_clicked = st.button(
+            calc_btn_label,
+            key=f"btn_calc_{current_cp}",
+            type="primary",
+            use_container_width=True,
+        )
+        if calc_clicked and is_valid:
+            c0_computed = engine.predict_checkpoint(
+                split=current_split,
+                checkpoint="C0",
+                gender=st.session_state["gender"],
+                agegroup=st.session_state["agegroup"],
+                countryiso=st.session_state["countryiso"],
+                eventlocation=final_location,
+                eventyear=st.session_state["eventyear"],
+            )
+            st.session_state["computed_results"]["C0"] = c0_computed
+            st.session_state["computed_signatures"]["C0"] = _build_cp_signature("C0")
+
+            if current_cp in {"C1", "C2"} and swim_seconds_val is not None:
+                c1_computed = engine.predict_checkpoint(
                     split=current_split,
-                    checkpoint="C0",
+                    checkpoint="C1",
                     gender=st.session_state["gender"],
                     agegroup=st.session_state["agegroup"],
                     countryiso=st.session_state["countryiso"],
                     eventlocation=final_location,
                     eventyear=st.session_state["eventyear"],
+                    swimtime_seconds=swim_seconds_val,
                 )
-                st.session_state["computed_results"]["C0"] = c0_computed
-                st.session_state["computed_signatures"]["C0"] = _build_cp_signature("C0")
+                st.session_state["computed_results"]["C1"] = c1_computed
+                st.session_state["computed_signatures"]["C1"] = _build_cp_signature("C1")
 
-                if current_cp in {"C1", "C2"} and swim_seconds_val is not None:
-                    c1_computed = engine.predict_checkpoint(
-                        split=current_split,
-                        checkpoint="C1",
-                        gender=st.session_state["gender"],
-                        agegroup=st.session_state["agegroup"],
-                        countryiso=st.session_state["countryiso"],
-                        eventlocation=final_location,
-                        eventyear=st.session_state["eventyear"],
-                        swimtime_seconds=swim_seconds_val,
-                    )
-                    st.session_state["computed_results"]["C1"] = c1_computed
-                    st.session_state["computed_signatures"]["C1"] = _build_cp_signature("C1")
-
-                if current_cp == "C2" and swim_seconds_val is not None and bike_seconds_val is not None:
-                    c2_computed = engine.predict_checkpoint(
-                        split=current_split,
-                        checkpoint="C2",
-                        gender=st.session_state["gender"],
-                        agegroup=st.session_state["agegroup"],
-                        countryiso=st.session_state["countryiso"],
-                        eventlocation=final_location,
-                        eventyear=st.session_state["eventyear"],
-                        swimtime_seconds=swim_seconds_val,
-                        biketime_seconds=bike_seconds_val,
-                    )
-                    st.session_state["computed_results"]["C2"] = c2_computed
-                    st.session_state["computed_signatures"]["C2"] = _build_cp_signature("C2")
+            if current_cp == "C2" and swim_seconds_val is not None and bike_seconds_val is not None:
+                c2_computed = engine.predict_checkpoint(
+                    split=current_split,
+                    checkpoint="C2",
+                    gender=st.session_state["gender"],
+                    agegroup=st.session_state["agegroup"],
+                    countryiso=st.session_state["countryiso"],
+                    eventlocation=final_location,
+                    eventyear=st.session_state["eventyear"],
+                    swimtime_seconds=swim_seconds_val,
+                    biketime_seconds=bike_seconds_val,
+                )
+                st.session_state["computed_results"]["C2"] = c2_computed
+                st.session_state["computed_signatures"]["C2"] = _build_cp_signature("C2")
 
         # Quick Advance Checkpoint Button
         if current_cp == "C0":
