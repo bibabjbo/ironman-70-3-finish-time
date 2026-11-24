@@ -93,6 +93,8 @@ def init_session_state() -> None:
         "bike_h": 2,
         "bike_m": 40,
         "bike_s": 0,
+        "computed_results": {},  # Persisted predictions per checkpoint: {"C0": res, "C1": res, "C2": res}
+        "computed_signatures": {},  # Persisted input signatures per checkpoint
         "replay_cp": "C0",
         "replay_resultid": 840060,
         "replay_reveal_actual": False,
@@ -120,6 +122,8 @@ def reset_demo_state() -> None:
         "bike_h",
         "bike_m",
         "bike_s",
+        "computed_results",
+        "computed_signatures",
         "replay_cp",
         "replay_resultid",
         "replay_reveal_actual",
@@ -440,18 +444,7 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                     """
                 )
 
-        # Quick Advance Checkpoint Button
-        if current_cp == "C0":
-            if st.button("→ HOÀN THÀNH BƠI & CHUYỂN SANG MỐC C1 (SAU CHẶNG BƠI)", key="adv_c1", use_container_width=True):
-                st.session_state["live_cp"] = "C1"
-                st.rerun()
-        elif current_cp == "C1":
-            if st.button("→ HOÀN THÀNH ĐẠP XE & CHUYỂN SANG MỐC C2 (SAU CHẶNG ĐẠP XE)", key="adv_c2", use_container_width=True):
-                st.session_state["live_cp"] = "C2"
-                st.rerun()
-
-    # Right Column: Validation, Main Prediction Card, Race Progress, and Model Comparison
-    with right_col:
+        # Explicit Action Button for Checkpoint Inference
         is_valid, validation_errors = validate_athlete_inputs(
             checkpoint=current_cp,
             gender=st.session_state["gender"],
@@ -464,6 +457,81 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             biketime_seconds=bike_seconds_val,
         )
 
+        def _build_cp_signature(cp_name: str) -> tuple:
+            base = (
+                current_split,
+                cp_name,
+                st.session_state["gender"],
+                st.session_state["agegroup"],
+                st.session_state["countryiso"],
+                final_location.strip(),
+                int(st.session_state["eventyear"]),
+            )
+            if cp_name == "C0":
+                return base
+            if cp_name == "C1":
+                return base + (float(swim_seconds_val or 0.0),)
+            return base + (float(swim_seconds_val or 0.0), float(bike_seconds_val or 0.0))
+
+        current_sig = _build_cp_signature(current_cp)
+
+        st.markdown("<div style='height: 0.45rem;'></div>", unsafe_allow_html=True)
+        calc_btn_label = f"TÍNH DỰ ĐOÁN {current_cp}"
+        if st.button(calc_btn_label, key=f"btn_calc_{current_cp}", type="primary", use_container_width=True):
+            if is_valid:
+                c0_computed = engine.predict_checkpoint(
+                    split=current_split,
+                    checkpoint="C0",
+                    gender=st.session_state["gender"],
+                    agegroup=st.session_state["agegroup"],
+                    countryiso=st.session_state["countryiso"],
+                    eventlocation=final_location,
+                    eventyear=st.session_state["eventyear"],
+                )
+                st.session_state["computed_results"]["C0"] = c0_computed
+                st.session_state["computed_signatures"]["C0"] = _build_cp_signature("C0")
+
+                if current_cp in {"C1", "C2"} and swim_seconds_val is not None:
+                    c1_computed = engine.predict_checkpoint(
+                        split=current_split,
+                        checkpoint="C1",
+                        gender=st.session_state["gender"],
+                        agegroup=st.session_state["agegroup"],
+                        countryiso=st.session_state["countryiso"],
+                        eventlocation=final_location,
+                        eventyear=st.session_state["eventyear"],
+                        swimtime_seconds=swim_seconds_val,
+                    )
+                    st.session_state["computed_results"]["C1"] = c1_computed
+                    st.session_state["computed_signatures"]["C1"] = _build_cp_signature("C1")
+
+                if current_cp == "C2" and swim_seconds_val is not None and bike_seconds_val is not None:
+                    c2_computed = engine.predict_checkpoint(
+                        split=current_split,
+                        checkpoint="C2",
+                        gender=st.session_state["gender"],
+                        agegroup=st.session_state["agegroup"],
+                        countryiso=st.session_state["countryiso"],
+                        eventlocation=final_location,
+                        eventyear=st.session_state["eventyear"],
+                        swimtime_seconds=swim_seconds_val,
+                        biketime_seconds=bike_seconds_val,
+                    )
+                    st.session_state["computed_results"]["C2"] = c2_computed
+                    st.session_state["computed_signatures"]["C2"] = _build_cp_signature("C2")
+
+        # Quick Advance Checkpoint Button
+        if current_cp == "C0":
+            if st.button("→ HOÀN THÀNH BƠI & CHUYỂN SANG MỐC C1 (SAU CHẶNG BƠI)", key="adv_c1", use_container_width=True):
+                st.session_state["live_cp"] = "C1"
+                st.rerun()
+        elif current_cp == "C1":
+            if st.button("→ HOÀN THÀNH ĐẠP XE & CHUYỂN SANG MỐC C2 (SAU CHẶNG ĐẠP XE)", key="adv_c2", use_container_width=True):
+                st.session_state["live_cp"] = "C2"
+                st.rerun()
+
+    # Right Column: Validation, Main Prediction Card, Race Progress, and Model Comparison
+    with right_col:
         if not is_valid:
             err_items = "".join(f"<li>{e}</li>" for e in validation_errors)
             render_html(
@@ -474,64 +542,56 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
                 </div>
                 """
             )
-        else:
-            # Compute progressive predictions up to current_cp
-            results_by_cp: Dict[str, Dict[str, Any]] = {}
-            c0_res = engine.predict_checkpoint(
-                split=current_split,
-                checkpoint="C0",
-                gender=st.session_state["gender"],
-                agegroup=st.session_state["agegroup"],
-                countryiso=st.session_state["countryiso"],
-                eventlocation=final_location,
-                eventyear=st.session_state["eventyear"],
+
+        stored_results: Dict[str, Dict[str, Any]] = st.session_state["computed_results"]
+        stored_sigs: Dict[str, tuple] = st.session_state["computed_signatures"]
+        has_result_for_cp = current_cp in stored_results
+        is_stale = has_result_for_cp and (stored_sigs.get(current_cp) != current_sig)
+
+        if not has_result_for_cp:
+            render_html(
+                f"""
+                <div class="nb-pending-box">
+                    <div style="margin-bottom: 0.65rem;">
+                        <span class="nb-badge nb-badge-{current_cp.lower()}">MỐC {current_cp} · CHỜ XÁC NHẬN TÍNH TOÁN</span>
+                    </div>
+                    <div style="font-family: var(--font-heading); font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">
+                        Nhập đầy đủ thông tin và nhấn nút để tính thời gian về đích dự đoán.
+                    </div>
+                    <p style="font-family: var(--font-mono); font-size: 0.86rem; margin: 0;">
+                        Nhấn nút <b>"{calc_btn_label}"</b> ở cột bên trái để thực hiện suy luận với mô hình <code>models/{current_split}_{current_cp}.cbm</code> và bảng <code>Baseline</code>.
+                    </p>
+                </div>
+                """
             )
-            results_by_cp["C0"] = c0_res
-
-            c1_res = None
-            if current_cp in {"C1", "C2"} and swim_seconds_val is not None:
-                c1_res = engine.predict_checkpoint(
-                    split=current_split,
-                    checkpoint="C1",
-                    gender=st.session_state["gender"],
-                    agegroup=st.session_state["agegroup"],
-                    countryiso=st.session_state["countryiso"],
-                    eventlocation=final_location,
-                    eventyear=st.session_state["eventyear"],
-                    swimtime_seconds=swim_seconds_val,
+        else:
+            if is_stale:
+                render_html(
+                    f"""
+                    <div class="nb-stale-banner">
+                        ⚠ Dữ liệu đã thay đổi – Vui lòng tính lại dự đoán (Nhấn nút "{calc_btn_label}" để cập nhật kết quả mới).
+                    </div>
+                    """
                 )
-                results_by_cp["C1"] = c1_res
 
-            c2_res = None
-            if current_cp == "C2" and swim_seconds_val is not None and bike_seconds_val is not None:
-                c2_res = engine.predict_checkpoint(
-                    split=current_split,
-                    checkpoint="C2",
-                    gender=st.session_state["gender"],
-                    agegroup=st.session_state["agegroup"],
-                    countryiso=st.session_state["countryiso"],
-                    eventlocation=final_location,
-                    eventyear=st.session_state["eventyear"],
-                    swimtime_seconds=swim_seconds_val,
-                    biketime_seconds=bike_seconds_val,
-                )
-                results_by_cp["C2"] = c2_res
+            active_res = stored_results[current_cp]
+            c0_res_stored = stored_results.get("C0")
+            c1_res_stored = stored_results.get("C1")
 
-            active_res = results_by_cp[current_cp]
-
-            # 7. Main FinishTime Prediction Card
+            # 7. Main FinishTime Prediction Card (Displays persisted result until recalculated)
             render_hero_prediction_card(
                 pred_result=active_res,
-                c0_pred_seconds=c0_res["CatBoost_ref"] if current_cp in {"C1", "C2"} else None,
-                c1_pred_seconds=c1_res["CatBoost_ref"] if (current_cp == "C2" and c1_res is not None) else None,
+                c0_pred_seconds=c0_res_stored["CatBoost_ref"] if (current_cp in {"C1", "C2"} and c0_res_stored is not None) else None,
+                c1_pred_seconds=c1_res_stored["CatBoost_ref"] if (current_cp == "C2" and c1_res_stored is not None) else None,
             )
 
-            # 8. Race Progress Visualization
+            # 8. Race Progress Visualization (Uses the persisted feature values of the displayed prediction)
+            stored_feats = active_res["feature_values"]
             render_race_progress_card(
                 checkpoint=current_cp,
                 pred_finish_seconds=active_res["CatBoost_ref"],
-                swimtime_seconds=swim_seconds_val,
-                biketime_seconds=bike_seconds_val,
+                swimtime_seconds=stored_feats.get("swimtime"),
+                biketime_seconds=stored_feats.get("biketime"),
             )
 
             # Exact Feature Vector Passed to CatBoost Model
@@ -552,7 +612,15 @@ if st.session_state["demo_mode"] == "LIVE_SIMULATION":
             )
 
     # 9. Model Comparison Section (Live Inference vs Baselines + Saved Historical Reference)
-    if is_valid:
+    if current_cp in st.session_state["computed_results"]:
+        results_by_cp = {
+            k: v
+            for k, v in st.session_state["computed_results"].items()
+            if (current_cp == "C0" and k == "C0")
+            or (current_cp == "C1" and k in {"C0", "C1"})
+            or (current_cp == "C2" and k in {"C0", "C1", "C2"})
+        }
+        active_res = results_by_cp[current_cp]
         rows_html = ""
         b0_s = active_res["B0"]
         rows_html += (

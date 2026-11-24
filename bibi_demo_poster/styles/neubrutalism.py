@@ -146,6 +146,31 @@ footer {visibility: hidden;}
     color: #000000;
 }
 
+/* Stale / Pending Calculation Status Banner */
+.nb-stale-banner {
+    background-color: var(--accent-coral);
+    border: 3px solid #000000;
+    box-shadow: 5px 5px 0px #000000;
+    border-radius: 0px !important;
+    padding: 0.85rem 1.2rem;
+    margin-bottom: 1.15rem;
+    font-family: var(--font-mono) !important;
+    font-size: 0.90rem;
+    font-weight: 700;
+    color: #000000;
+}
+
+.nb-pending-box {
+    background-color: #FFFDF5;
+    border: 3px dashed #000000;
+    box-shadow: 5px 5px 0px #000000;
+    border-radius: 0px !important;
+    padding: 1.75rem 1.5rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+    color: #000000;
+}
+
 /* Header Banner */
 .nb-header-box {
     background-color: #FFFFFF;
